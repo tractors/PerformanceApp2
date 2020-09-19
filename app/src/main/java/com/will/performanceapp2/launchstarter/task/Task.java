@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 /**
- * 任务实现类
+ * 任务具体的实现类
  */
 public abstract class Task implements ITask {
     protected String mTag = getClass().getSimpleName().toString();
