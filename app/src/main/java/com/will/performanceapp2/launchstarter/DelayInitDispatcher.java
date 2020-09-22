@@ -9,6 +9,9 @@ import com.will.performanceapp2.launchstarter.task.Task;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * 延迟加载更优方案，IdleHandler在系统空闲时执行调用
+ */
 public class DelayInitDispatcher {
     private Queue<Task> mDelayTasks = new LinkedList<>();
 

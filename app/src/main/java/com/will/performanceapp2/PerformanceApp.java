@@ -15,12 +15,15 @@ import com.taobao.weex.InitConfig;
 import com.taobao.weex.WXSDKEngine;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.umeng.commonsdk.UMConfigure;
-import com.will.performanceapp2.bean.NewsItem;
+import com.will.performanceapp2.bean.PhotoItem;
 import com.will.performanceapp2.launchstarter.TaskDispatcher;
+import com.will.performanceapp2.tasks.GetDeviceIdTask;
 import com.will.performanceapp2.tasks.InitAMapTask;
 import com.will.performanceapp2.tasks.InitBuglyTask;
 import com.will.performanceapp2.tasks.InitFrescoTask;
+import com.will.performanceapp2.tasks.InitJPushTask;
 import com.will.performanceapp2.tasks.InitStethoTask;
+import com.will.performanceapp2.tasks.InitUmengTask;
 import com.will.performanceapp2.tasks.InitWeexTask;
 import com.will.performanceapp2.utils.LaunchTimer;
 
@@ -77,7 +80,8 @@ public class PerformanceApp extends Application {
                 .addTask(new InitStethoTask())
                 .addTask(new InitAMapTask())
                 .addTask(new InitFrescoTask())
-                .addTask(new InitBuglyTask());
+                .start();
+        dispatcher.await();
         LaunchTimer.endRecord();
     }
 
@@ -92,7 +96,7 @@ public class PerformanceApp extends Application {
                     .build());
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                     .detectLeakedSqlLiteObjects()
-                    .setClassInstanceLimit(NewsItem.class, 1)
+                    .setClassInstanceLimit(PhotoItem.class, 1)
                     .detectLeakedClosableObjects() //API等级11
                     .penaltyLog()
                     .build());
