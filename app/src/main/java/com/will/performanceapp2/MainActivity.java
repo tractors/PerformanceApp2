@@ -1,10 +1,20 @@
 package com.will.performanceapp2;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
+import androidx.core.view.LayoutInflaterCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 
 import com.alibaba.fastjson.JSON;
@@ -18,6 +28,8 @@ import com.will.performanceapp2.launchstarter.DelayInitDispatcher;
 import com.will.performanceapp2.net.RetrofitNewsUtils;
 import com.will.performanceapp2.tasks.delayinittask.DelayInitTaskA;
 import com.will.performanceapp2.tasks.delayinittask.DelayInitTaskB;
+import com.will.performanceapp2.utils.LogUtils;
+
 
 import org.json.JSONObject;
 
@@ -31,6 +43,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+//@Xml(layouts = "Activity_main")
 public class MainActivity extends AppCompatActivity implements OnFeedShowCallBack {
 
     private AlphaAnimation alphaAnimation;
@@ -42,11 +55,67 @@ public class MainActivity extends AppCompatActivity implements OnFeedShowCallBac
     public List<PhotoItem> mItems = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setTheme(R.style.AppTheme);
-        Fresco.initialize(this);
-        setContentView(R.layout.activity_main);
 
+        //ANR测试
+//        new Thread(){
+//            @Override
+//            public void run() {
+//                super.run();
+//                synchronized (MainActivity.this){
+//                    try {
+//                        Thread.sleep(20000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }.start();
+
+        LayoutInflaterCompat.setFactory2(getLayoutInflater(), new LayoutInflater.Factory2() {
+            @Nullable
+            @Override
+            public View onCreateView(@Nullable View parent, @NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
+                if (TextUtils.equals("TextView",name)){
+                    //创建自定义TextView
+                }
+
+                //获取任意控件加载耗时
+                long startTime = System.currentTimeMillis();
+                View view = getDelegate().createView(parent,name,context,attrs);
+
+                LogUtils.i("const "+ (System.currentTimeMillis() - startTime));
+
+                return view;
+            }
+
+            @Nullable
+            @Override
+            public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
+                return null;
+            }
+        });
+
+        //异步加载布局测试
+//        new AsyncLayoutInflater(MainActivity.this).inflate(R.layout.activity_main, null, new AsyncLayoutInflater.OnInflateFinishedListener() {
+//            @Override
+//            public void onInflateFinished(@NonNull View view, int resid, @Nullable ViewGroup parent) {
+//                mRecyclerView = findViewById(R.id.recycler_view);
+//
+//                mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+//
+//                mRecyclerView.setAdapter(mNewsAdapter);
+//                mNewsAdapter.setOnFeedShowCallBack(MainActivity.this);
+//            }
+//        });
+
+        setTheme(R.style.AppTheme);
+        super.onCreate(savedInstanceState);
+
+
+        Fresco.initialize(this);
+        mNewsAdapter = new NewsAdapter(mItems);
+        setContentView(R.layout.activity_main);
+//        X2C.setContentView(this,R.layout.activity_main);
         mRecyclerView = findViewById(R.id.recycler_view);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -55,6 +124,15 @@ public class MainActivity extends AppCompatActivity implements OnFeedShowCallBac
         mNewsAdapter.setOnFeedShowCallBack(this);
 
         getNews();
+
+//        try {
+//            Thread.currentThread().sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        synchronized (MainActivity.this){
+//            LogUtils.i("llllllllllllllll");
+//        }
     }
 
     private void getNews() {
@@ -65,8 +143,13 @@ public class MainActivity extends AppCompatActivity implements OnFeedShowCallBac
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try {
                             String json = response.body().string();
-                            JSONObject jsonObject = new JSONObject(json);
-                            mItems = Arrays.asList(new Gson().fromJson(json, Pixabay.class).getHits());
+                            if (!json.isEmpty()){
+                                //JSONObject jsonObject = new JSONObject(json);
+                                Gson gson = new Gson();
+                                mItems = Arrays.asList(gson.fromJson(json, Pixabay.class).getHits());
+                                mNewsAdapter.setItems(mItems);
+                            }
+
 
 //                            JSONObject data = jsonObject.getJSONObject("data");
 //                            Iterator<String> keys = data.keys();
@@ -76,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnFeedShowCallBac
 //                                NewsItem newsItem = JSON.parseObject(itemJO.toString(), NewsItem.class);
 //                                mItems.add(newsItem);
 //                            }
-                            mNewsAdapter.setItems(mItems);
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -103,5 +186,10 @@ public class MainActivity extends AppCompatActivity implements OnFeedShowCallBac
 
 
         // 一系列操作 10s
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
     }
 }

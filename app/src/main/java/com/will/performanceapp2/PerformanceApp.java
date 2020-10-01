@@ -1,9 +1,13 @@
 package com.will.performanceapp2;
 
 import android.app.Application;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcel;
 import android.os.StrictMode;
+import android.util.Log;
+import android.widget.ImageView;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -11,12 +15,14 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.stetho.Stetho;
+
 import com.taobao.weex.InitConfig;
 import com.taobao.weex.WXSDKEngine;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.umeng.commonsdk.UMConfigure;
 import com.will.performanceapp2.bean.PhotoItem;
 import com.will.performanceapp2.launchstarter.TaskDispatcher;
+import com.will.performanceapp2.memory.ImageHook;
 import com.will.performanceapp2.tasks.GetDeviceIdTask;
 import com.will.performanceapp2.tasks.InitAMapTask;
 import com.will.performanceapp2.tasks.InitBuglyTask;
@@ -26,6 +32,7 @@ import com.will.performanceapp2.tasks.InitStethoTask;
 import com.will.performanceapp2.tasks.InitUmengTask;
 import com.will.performanceapp2.tasks.InitWeexTask;
 import com.will.performanceapp2.utils.LaunchTimer;
+import com.will.performanceapp2.utils.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +40,9 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 
 import cn.jpush.android.api.JPushInterface;
+import de.robv.android.xposed.DexposedBridge;
+import de.robv.android.xposed.XC_MethodHook;
+
 
 public class PerformanceApp extends Application {
 
@@ -83,6 +93,32 @@ public class PerformanceApp extends Application {
                 .start();
         dispatcher.await();
         LaunchTimer.endRecord();
+
+//        DexposedBridge.hookAllConstructors(ImageView.class, new XC_MethodHook() {
+//            @Override
+//            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                super.afterHookedMethod(param);
+//                DexposedBridge.findAndHookMethod(ImageView.class, "setImageBitmap", Bitmap.class, new ImageHook());
+//            }
+//        });
+
+//        try {
+//            DexposedBridge.findAndHookMethod(Class.forName("android.os.BinderProxy"), "transact",
+//                    int.class, Parcel.class, Parcel.class, int.class, new XC_MethodHook() {
+//                        @Override
+//                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//                            LogUtils.i("BinderProxy beforeHookedMethod " + param.thisObject.getClass().getSimpleName()
+//                                    + "\n" + Log.getStackTraceString(new Throwable()));
+//                            super.beforeHookedMethod(param);
+//                        }
+//                    });
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+
+//        BlockCanary.install(this,new BlockCanaryContext()).start();
+
+//        new ANRWatchDog().start();
     }
 
     private void initStrictMode() {

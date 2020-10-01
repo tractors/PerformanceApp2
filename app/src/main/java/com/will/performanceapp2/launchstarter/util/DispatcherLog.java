@@ -9,7 +9,7 @@ public class DispatcherLog {
     private static boolean sDebug = true;
 
     public static void i(String msg) {
-        if (!sDebug) {
+        if (sDebug) {
             return;
         }
         Log.i("task",msg);

@@ -1,5 +1,7 @@
 package com.will.performanceapp2.launchstarter.sort;
 
+import android.annotation.SuppressLint;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +17,7 @@ public class Graph {
     //邻接表
     private List<Integer>[] mAdj;
 
+    @SuppressLint("unchecked")
     public Graph(int verticeCount) {
         this.mVerticeCount = verticeCount;
         mAdj = new ArrayList[mVerticeCount];
@@ -36,8 +39,9 @@ public class Graph {
     /**
      * 拓扑排序
      */
+    @SuppressLint("unchecked")
     public Vector<Integer> topologicalSort() {
-        int indegree[] = new int[mVerticeCount];
+        int[] indegree = new int[mVerticeCount];
         for (int i = 0; i < mVerticeCount; i++) {//初始化所有点的入度数量
             ArrayList<Integer> temp = (ArrayList<Integer>) mAdj[i];
             for (int node : temp) {
